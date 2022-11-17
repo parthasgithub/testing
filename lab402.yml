@@ -1,0 +1,64 @@
+---
+- name: lab402
+  hosts: all
+  tasks: 
+  - name: ssh serv port 3456
+    replace: 
+      path: /etc/ssh/sshd_config
+      regexp: "Port 3456"
+      replace: "Port 2222"
+      backup: yes
+
+  - name: add to firewall
+    firewalld: 
+      service: ssh
+      permanent: yes
+      state: enabled
+ 
+  - name: reloading sshd
+    service:
+      name: sshd
+      state: reloaded
+
+- name: httpd
+  hosts: all
+  tasks:
+  - name: httpd install
+    yum:
+      name: httpd
+      state: latest
+    tags: r-httpd
+  - name: add to firewall
+    firewalld:
+      service: http
+      permanent: yes
+      state: enabled
+  - name: restart httpd
+    service:
+      name: httpd
+      state: restarted                       
+
+- name: nginx
+  hosts: all
+  vars:
+   pack: nginx
+  tasks: 
+  - name: install ngnix
+    yum:
+      name: "{{ pack }}"
+      state: latest 
+    notify:
+    - startngnix 
+  
+  - name: startngnix
+    service:
+      name: "{{ pack }}"
+      state: started
+  handlers:
+  - name: startngnix
+    service:
+      name: "{{ pack }}"
+      state: started
+
+  
+ 
