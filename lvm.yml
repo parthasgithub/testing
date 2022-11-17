@@ -1,0 +1,32 @@
+---
+- name: lvm 
+  hosts: all
+  tasks: 
+  - name: create vg group
+    lvg:
+      vg: vg1
+      pvs: /dev/sdb
+      
+  - name: extend vg group
+    lvg:
+      vg: vg1
+      pvs: /dev/sdb,/dev/sdc
+
+  - name: create logical volume
+    lvol:
+      vg: vg1
+      lv: lv1
+      size: 1G
+  - name: make filesysstem 
+    filesystem: 
+      fstype: xfs
+      dev: /dev/vg1/lv1
+    tags: f-file
+  - name: mount to home
+    mount: 
+      path: /tmp
+      src: /dev/vg1/lv1
+      fstype: xfs
+      state: mounted
+    tags: m-mount
+# rumal is gay
